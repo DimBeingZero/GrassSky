@@ -60,6 +60,8 @@ public:
 
     int time_count =0;
 
+    void BatForce();
+
 
 protected:
     void initializeGL();
@@ -117,6 +119,26 @@ private:
     GLfloat m_xmove;
     GLfloat m_ymove;
     GLfloat m_zmove;
+
+    GLfloat ForceApply;
+    GLfloat Force_y;
+    GLfloat Force_z;
+
+
+    GLfloat fricy;
+    GLfloat fricz;
+    GLfloat ay;
+    GLfloat az;
+    GLfloat rou;
+    GLfloat vy;
+    GLfloat vz;
+    GLfloat vy0;
+    GLfloat vz0;
+    GLfloat Fy_total;
+    GLfloat Fz_total;
+    GLfloat mass;
+    GLfloat beta;
+    GLfloat  time_c;
 
     //SECTOR loadObject(QString filename, OBJECT *k);
 

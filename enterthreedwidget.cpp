@@ -44,6 +44,21 @@ EnterThreeDWidget::EnterThreeDWidget(QWidget *parent) :
     m_zmove = 0.0f;
     k_LookUpDown = 0.0f;
 
+    fricy = 0.0;
+    fricz = 0.0;
+    ay = 0;
+    az = 0.0;
+    rou = 0.0;
+    vy0 = 15.0;
+    vz0 = -10.0;
+    vy = vy0;
+    vz =vz0;
+
+    Fy_total = 0;
+    Fz_total = 0;
+    mass = 0.2;//kg
+    beta = atan(vy0/vz0);
+
     QTimer *timer = new QTimer(this);
 
     connect(timer, SIGNAL(timeout()),this, SLOT(updateGL()));
@@ -201,11 +216,12 @@ void EnterThreeDWidget::paintGL()
     glRotatef(sceneroty, 0.0f,1.0f,0.0f);
     glTranslatef(xTrans, yTrans, zTrans);
 
-    qDebug("xTrans = %f, yTrans = %f, zTrans = %f",xTrans, yTrans, zTrans);
+    //qDebug("xTrans = %f, yTrans = %f, zTrans = %f",xTrans, yTrans, zTrans);
 
 
     Sky_Sector = loadObject(m_SkyFile);
     //glBindTexture(GL_TEXTURE_2D, Sky_Texture);
+
     DrawSector(Sky_Sector,Sky_Texture);
 
     Grass_Sector = loadObject(m_GrassFile);
@@ -281,6 +297,9 @@ void EnterThreeDWidget::paintGL()
 
 
     QMatrix4x4 ccMatrix = matrix;
+    BatForce();
+    qDebug("m_ymove = %f, ",m_ymove);
+
 
     ccMatrix.rotate(360.0 - k_yRot,QVector3D(0,1,0));
 
@@ -290,15 +309,13 @@ void EnterThreeDWidget::paintGL()
     ccMatrix.rotate(m_zRot,QVector3D(0,1,0));
     ccMatrix.rotate(m_xRot,QVector3D(1,0,0));
     //qDebug("m_ymove = %f,y_Rot = %f",m_ymove,k_yRot);
-    qDebug()<<ccMatrix;
+    //qDebug()<<ccMatrix;
 
 
 
 
     // Render
     m_sphere->Render(ccMatrix);
-
-
 
 
 }
@@ -372,6 +389,22 @@ void EnterThreeDWidget::keyPressEvent(QKeyEvent *event)
         m_ymove = 0.0f;
         m_zmove = 0.0f;
         k_LookUpDown = 0.0f;
+        time_count = 0.0f;
+        vy = -5.0;
+        vz = -3.0;
+        break;
+    case Qt::Key_F:
+        time_count++;
+        //qDebug()<< ForceApply;
+
+        ForceApply = time_count * 0.001;
+        time_c = time_count * 0.01;
+
+        if (time_c >(2*vy0/9.8))
+        {
+                time_count = 0;
+        }
+
         break;
 
     }
@@ -383,7 +416,7 @@ void EnterThreeDWidget::mouseMoveEvent(QMouseEvent *event)
          GLfloat dx = GLfloat(event->x() - lastPos.x())/width();
          GLfloat dy = GLfloat(event->y() - lastPos.y())/height();
 
-         qDebug("globalX = %f",lastPos.x());
+         //qDebug("globalX = %f",lastPos.x());
 
          if (event->buttons() & Qt::LeftButton) {
              cursor.setShape(Qt::ClosedHandCursor);
@@ -415,6 +448,38 @@ void EnterThreeDWidget::mouseReleaseEvent(QMouseEvent *event)
 //    m_zRot = 0;
     cursor.setShape(Qt::ArrowCursor);
     setCursor(cursor);
+}
+
+void EnterThreeDWidget::BatForce()
+{
+
+    Force_y = (float)sin(beta * m_PIOVER180)*ForceApply;
+    Force_z = (float)cos(beta * m_PIOVER180)*ForceApply;
+
+
+    fricy = -rou * vy ;
+    //qDebug("fricy = %f,vy = %f",fricy,vy);
+    Fy_total = fricy + mass * (-9.8);
+    ay = Fy_total/mass;
+    m_ymove = vy0* time_c + 0.5 * ay * time_c *time_c; //has to be 0.5, not 1/2
+    //qDebug("square part  = %f",0.5 * ay * time_c *time_c);
+    qDebug("time_c = %f,ay = %f,m_ymove = %f,vy0 = %f",time_c,ay,m_ymove,vy0);
+    vy =vy + time_c * ay;
+
+    fricz = -rou * vz;
+    Fz_total =fricz;
+    az = Fz_total/mass;
+    m_zmove = vz0 * time_c + 0.5 * az * time_c*time_c;
+    vz = vz + time_c * az;
+    qDebug("m_zmove = %f",m_zmove);
+
+    beta =  atan(vy/vz);
+    //qDebug("beta =  %f",beta);
+
+
+
+
+
 }
 
 

@@ -23,7 +23,7 @@ bool cLoadOBJ::ImportModel(cObjModel *pModel, const char *strFileName)
     char stmp[512] = {0};
     // match the path and the filename
     strcpy(stmp,g_sMediaPath);
-    qDebug("g_sMediaPath = %s",g_sMediaPath);
+    //qDebug("g_sMediaPath = %s",g_sMediaPath);
     strcat(stmp,"/models/");
     strcat(stmp,strFileName);
 
@@ -38,7 +38,7 @@ bool cLoadOBJ::ImportModel(cObjModel *pModel, const char *strFileName)
 
     // ensure the point
     if(!m_FilePointer){
-        qDebug("cannot find: %s!", strFileName);
+        //qDebug("cannot find: %s!", strFileName);
         return false;
     }
 //    else
@@ -219,7 +219,7 @@ void cLoadOBJ::ProcessMtlFileInfo(cObjModel *pModel, char *MtlFileName)
     #endif
 
     if(!pMTLFilePointer){
-        qDebug("Con not find: %s!", MtlFileName);
+        //qDebug("Con not find: %s!", MtlFileName);
         return;
     }
 //    else

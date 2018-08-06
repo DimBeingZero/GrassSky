@@ -101,7 +101,7 @@ void cModelObject::Draw()
 {
 #ifndef OPENGL_ES
     glBindVertexArray(vertexArrayBufferObject);
-    qDebug("ES not defined %f",1.0);
+    //qDebug("ES not defined %f",1.0);
 #else
     glBindBuffer(GL_ARRAY_BUFFER, bufferObjects[VERTEX_DATA]);
     glEnableVertexAttribArray(GLT_ATTRIBUTE_VERTEX);
@@ -363,7 +363,7 @@ bool cMeshModel::LoadOBJFromFile(const char *sfilename)
         obj->faceIndexes  = &pObject->vFaceIndices;
         m_currentObj.push_back(obj);
 
-        qDebug("%d,v=%d,t=%d",i,obj->VertPos->size(),obj->VertTexts->size());
+        //qDebug("%d,v=%d,t=%d",i,obj->VertPos->size(),obj->VertTexts->size());
         // Create VA\BO
         m_currentObj[i]->GenerateVABO();
     }
@@ -398,12 +398,12 @@ bool cMeshModel::LoadOBJFromFile(const char *sfilename)
             }
             else{
                 // setup matarial index
-                if(!CreateTexture(&g_Texture[ntextID],stmp, 0))
-                    qDebug("Texture:%s, failed",stmp);
+                if(!CreateTexture(&g_Texture[ntextID],stmp, 0)) //meet this condition, only run the following one line
+                    qDebug("Texture:%s, failed",stmp); //so comment out this line will disable the material?
                 //m_3DModel.vctMaterials[i].texureId = g_Texture[ntextID];
                 ui_TextureID[i] = g_Texture[ntextID];
 
-                qDebug("Texture:%s",stmp);
+                //qDebug("Texture:%s",stmp);
 
                 // Save Current Texture
                 m_MapTexture.insert(std::pair<QString,unsigned int>(strName,ntextID));
