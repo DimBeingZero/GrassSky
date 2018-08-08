@@ -58,9 +58,11 @@ public:
     void DrawSector(SECTOR sec,GLuint a_Texture);
     SECTOR loadObject(QString filename);
 
-    int time_count =0;
+    GLfloat time_count ;
+    int Fkey_released;
 
-    void BatForce();
+
+    void BatForce(GLfloat ForceApply);
 
 
 protected:
@@ -69,6 +71,7 @@ protected:
     void paintGL();
 
     void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
 
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
@@ -146,5 +149,6 @@ private:
     QMatrix4x4 matrix;
 
 };
+
 
 #endif // ENTERTHREEDWIDGET_H

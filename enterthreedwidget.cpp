@@ -57,7 +57,10 @@ EnterThreeDWidget::EnterThreeDWidget(QWidget *parent) :
     Fy_total = 0;
     Fz_total = 0;
     mass = 0.2;//kg
-    beta = atan(vy0/vz0);
+    ForceApply = 0;
+    beta = 0;
+    //beta = atan(vy0/vz0);
+    Fkey_released = 0;
 
     QTimer *timer = new QTimer(this);
 
@@ -129,6 +132,7 @@ void EnterThreeDWidget::initializeGL()
     glBlendFunc(GL_SRC_ALPHA,GL_ONE);
 
     matrix.perspective(90.0f,(GLfloat)mWindowWidth/mWindowHeight,0.1f,100.0f);
+
 
     glClearColor(0.92,0.95,0.95,0);
     glShadeModel(GL_SMOOTH);
@@ -297,8 +301,67 @@ void EnterThreeDWidget::paintGL()
 
 
     QMatrix4x4 ccMatrix = matrix;
-    BatForce();
-    qDebug("m_ymove = %f, ",m_ymove);
+    qDebug("Fkey_released in paint");
+    qDebug()<<Fkey_released;
+
+    //qDebug("m_ymove = %f, ",m_ymove);
+    if (Fkey_released == 1)
+    {
+        beta = 60;
+
+        Force_y = (float)sin(beta * m_PIOVER180 * 0.1)*ForceApply;
+        Force_z = (float)cos(beta * m_PIOVER180 * 0.1)*ForceApply;
+        qDebug("angel = %f, sin = %f",beta*m_PIOVER180*0.1,sin(beta * m_PIOVER180*0.1));
+
+        qDebug("ForceApply in BatForce = %f",ForceApply);
+
+        vy0 = Force_y * 0.5;
+        vz0 = -Force_z * 0.5;
+        //time_c = time_count * 0.01;
+
+        //qDebug("2*vy0/9.8 =%f",2*vy0*0.102);
+        //qDebug("time_c =%f",time_c);
+        if (time_c<= (2*vy0*0.102))
+        {
+            //BatForce(ForceApply);
+            Fy_total = fricy + mass * (-9.8);
+            ay = Fy_total/mass;
+            m_ymove = vy0* time_c + 0.5 * ay * time_c *time_c; //has to be 0.5, not 1/2
+            //qDebug("square part  = %f",0.5 * ay * time_c *time_c);
+            qDebug("time_c = %f,ay = %f,m_ymove = %f,vy0 = %f",time_c,ay,m_ymove,vy0);
+            vy =vy + time_c * ay;
+
+            fricz = -rou * vz;
+            Fz_total =fricz;
+            az = Fz_total/mass;
+            m_zmove = vz0 * time_c + 0.5 * az * time_c*time_c;
+
+            time_c += 0.01;
+            Fkey_released = 1;
+        }
+        if (time_c > (2*(vy0)*0.102))
+        {
+            time_c = 0;
+            Fkey_released = 0;
+            ForceApply = 0;
+        }
+
+
+//        if (time_c >(2*vy0*0.102))
+//        {
+//                time_count = 0;
+//                Fkey_released =0;
+//        }
+//        else
+//        {
+
+
+//        }
+        qDebug("time_c = %f",time_c);
+
+
+
+    }
 
 
     ccMatrix.rotate(360.0 - k_yRot,QVector3D(0,1,0));
@@ -390,25 +453,46 @@ void EnterThreeDWidget::keyPressEvent(QKeyEvent *event)
         m_zmove = 0.0f;
         k_LookUpDown = 0.0f;
         time_count = 0.0f;
-        vy = -5.0;
-        vz = -3.0;
+//        vy = -5.0;
+//        vz = -3.0;
         break;
     case Qt::Key_F:
-        time_count++;
+        time_count =0;
+
+
         //qDebug()<< ForceApply;
 
-        ForceApply = time_count * 0.001;
-        time_c = time_count * 0.01;
+        ForceApply +=  0.1;
+        qDebug("ForceApply = %f", ForceApply);
 
-        if (time_c >(2*vy0/9.8))
-        {
-                time_count = 0;
-        }
 
         break;
 
     }
 
+}
+
+void EnterThreeDWidget::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F)
+    {
+        if (event->isAutoRepeat())
+        {
+            qDebug()<<"auto";
+            Fkey_released =0;
+            return;
+        }
+        else
+        {
+            //BatForce();
+            Fkey_released =1;
+
+            qDebug()<<Fkey_released;
+        }
+
+
+
+    }
 }
 
 void EnterThreeDWidget::mouseMoveEvent(QMouseEvent *event)
@@ -450,26 +534,22 @@ void EnterThreeDWidget::mouseReleaseEvent(QMouseEvent *event)
     setCursor(cursor);
 }
 
-void EnterThreeDWidget::BatForce()
+void EnterThreeDWidget::BatForce(GLfloat ForceApply)
 {
-
-    Force_y = (float)sin(beta * m_PIOVER180)*ForceApply;
-    Force_z = (float)cos(beta * m_PIOVER180)*ForceApply;
-
 
     fricy = -rou * vy ;
     //qDebug("fricy = %f,vy = %f",fricy,vy);
-    Fy_total = fricy + mass * (-9.8);
-    ay = Fy_total/mass;
-    m_ymove = vy0* time_c + 0.5 * ay * time_c *time_c; //has to be 0.5, not 1/2
-    //qDebug("square part  = %f",0.5 * ay * time_c *time_c);
-    qDebug("time_c = %f,ay = %f,m_ymove = %f,vy0 = %f",time_c,ay,m_ymove,vy0);
-    vy =vy + time_c * ay;
+//    Fy_total = fricy + mass * (-9.8);
+//    ay = Fy_total/mass;
+//    m_ymove = vy0* time_c + 0.5 * ay * time_c *time_c; //has to be 0.5, not 1/2
+//    //qDebug("square part  = %f",0.5 * ay * time_c *time_c);
+//    qDebug("time_c = %f,ay = %f,m_ymove = %f,vy0 = %f",time_c,ay,m_ymove,vy0);
+//    vy =vy + time_c * ay;
 
-    fricz = -rou * vz;
-    Fz_total =fricz;
-    az = Fz_total/mass;
-    m_zmove = vz0 * time_c + 0.5 * az * time_c*time_c;
+//    fricz = -rou * vz;
+//    Fz_total =fricz;
+//    az = Fz_total/mass;
+//    m_zmove = vz0 * time_c + 0.5 * az * time_c*time_c;
     vz = vz + time_c * az;
     qDebug("m_zmove = %f",m_zmove);
 
