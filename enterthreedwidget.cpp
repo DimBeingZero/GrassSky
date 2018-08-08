@@ -7,6 +7,8 @@
 #include<QDebug>
 #include<QFile>
 #include<QOpenGLContext>
+#include<QtGlobal>
+#include <QDateTime>
 #include "MeshModel.h"
 
 cMeshModel  *m_sphere;
@@ -66,6 +68,8 @@ EnterThreeDWidget::EnterThreeDWidget(QWidget *parent) :
 
     connect(timer, SIGNAL(timeout()),this, SLOT(updateGL()));
     timer->start(10);
+
+
 
     cursor.setShape(Qt::ArrowCursor);
     setCursor(cursor);
@@ -301,19 +305,32 @@ void EnterThreeDWidget::paintGL()
 
 
     QMatrix4x4 ccMatrix = matrix;
-    qDebug("Fkey_released in paint");
-    qDebug()<<Fkey_released;
+    //qDebug("Fkey_released in paint");
+   // qDebug()<<Fkey_released;
+
+    int seed =  QDateTime::currentDateTime().time().second();
+    srand(seed);
+    int rand_num = rand()%40;
+    rand_num = (-1)*rand_num;
+
+    beta = 85 + rand_num;
+
+    qDebug("beta random = %f",beta);
 
     //qDebug("m_ymove = %f, ",m_ymove);
     if (Fkey_released == 1)
     {
-        beta = 60;
+//        int seed =  QDateTime::currentDateTime().time().second();
+//        srand(seed);
+//        beta = 60 + (-1)*rand()%10;
+
+//        qDebug("beta random = %f",beta);
 
         Force_y = (float)sin(beta * m_PIOVER180 * 0.1)*ForceApply;
         Force_z = (float)cos(beta * m_PIOVER180 * 0.1)*ForceApply;
-        qDebug("angel = %f, sin = %f",beta*m_PIOVER180*0.1,sin(beta * m_PIOVER180*0.1));
+        //qDebug("angel = %f, sin = %f",beta*m_PIOVER180*0.1,sin(beta * m_PIOVER180*0.1));
 
-        qDebug("ForceApply in BatForce = %f",ForceApply);
+        //qDebug("ForceApply in BatForce = %f",ForceApply);
 
         vy0 = Force_y * 0.5;
         vz0 = -Force_z * 0.5;
